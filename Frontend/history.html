@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Med3D – History</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div class="container">
+  <div class="nav">
+    <div><strong>Med3D</strong></div>
+    <div class="row">
+      <a href="./index.html" class="btn secondary">Upload</a>
+      <button id="btnSignOut" class="btn secondary">Sign out</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <input id="search" class="input" placeholder="Search by name..." />
+      <button id="btnSearch" class="btn">Search</button>
+    </div>
+  </div>
+
+  <div id="list" class="list" style="margin-top:12px;"></div>
+</div>
+
+<script type="module">
+import { requireUser, getSessionToken, signOut } from './js/auth.js';
+const listEl = document.getElementById('list');
+const btnSearch = document.getElementById('btnSearch');
+const searchEl = document.getElementById('search');
+document.getElementById('btnSignOut').onclick = () => signOut();
+
+await requireUser();
+
+async function load(search='') {
+  const token = await getSessionToken();
+  const url = new URL('http://localhost:5500/api/history');
+  if (search) url.searchParams.set('search', search);
+  const resp = await fetch(url, { headers: { Authorization: 'Bearer ' + token }});
+  const data = await resp.json();
+  if (!resp.ok) { alert(data.error || 'Failed'); return; }
+  render(data.items || []);
+}
+
+function render(items) {
+  listEl.innerHTML = '';
+  for (const it of items) {
+    const row = document.createElement('div');
+    row.className = 'item';
+    row.innerHTML = `
+      <div>
+        <div><strong>${escapeHtml(it.name)}</strong></div>
+        <div class="small">${new Date(it.created_at).toLocaleString()}</div>
+        <div class="small">Image: <a href="${it.image_url}" target="_blank">open</a> &middot; Model: <a href="${it.model_url}" target="_blank">open</a></div>
+      </div>
+      <div class="row">
+        <button class="btn secondary" data-view="${it.share_id}">View</button>
+        <button class="btn secondary" data-copy="${it.share_id}">Copy Link</button>
+        <button class="btn secondary" data-rename="${it.id}">Rename</button>
+        <button class="btn" data-del="${it.id}">Delete</button>
+      </div>
+    `;
+    listEl.appendChild(row);
+  }
+
+  listEl.onclick = async (e) => {
+    const t = e.target;
+    if (t.dataset.view) {
+      window.open(`./viewer.html?id=${t.dataset.view}`, '_blank');
+    } else if (t.dataset.copy) {
+      const link = `${location.origin}/viewer.html?id=${t.dataset.copy}`;
+      await navigator.clipboard.writeText(link);
+      alert('Link copied!');
+    } else if (t.dataset.rename) {
+      const id = t.dataset.rename;
+      const name = prompt('New name:');
+      if (!name) return;
+      await rename(id, name);
+      await load(searchEl.value.trim());
+    } else if (t.dataset.del) {
+      const id = t.dataset.del;
+      if (!confirm('Delete this item?')) return;
+      await del(id);
+      await load(searchEl.value.trim());
+    }
+  };
+}
+
+async function rename(id, name) {
+  const token = await getSessionToken();
+  const resp = await fetch(`http://localhost:5500/api/uploads/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    body: JSON.stringify({ name })
+  });
+  if (!resp.ok) {
+    const d = await resp.json();
+    alert(d.error || 'Rename failed');
+  }
+}
+
+async function del(id) {
+  const token = await getSessionToken();
+  const resp = await fetch(`http://localhost:5500/api/uploads/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: 'Bearer ' + token }
+  });
+  if (!resp.ok) {
+    const d = await resp.json();
+    alert(d.error || 'Delete failed');
+  }
+}
+
+btnSearch.onclick = () => load(searchEl.value.trim());
+load();
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+</script>
+</body>
+</html>
