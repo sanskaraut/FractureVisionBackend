@@ -55,6 +55,43 @@ if (fs.existsSync(assetsPath)) {
 app.get('/health', (_, res) => res.send('OK'));
 
 // ---------- API Routes ----------
+
+import supabase from './supabase.js';
+
+// Public API for Unity: Get all uploads for a username
+app.get('/api/unity/history/:username', async (req, res) => {
+  const username = req.params.username;
+  if (!username) return res.status(400).json({ error: 'Missing username' });
+  try {
+    // Find user by username
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('username', username)
+      .single();
+    if (userError || !user) return res.status(404).json({ error: 'User not found' });
+
+    // Get uploads for user
+    const { data: uploads, error: uploadsError } = await supabase
+      .from('uploads')
+      .select('name, model_url, image_url')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    if (uploadsError) throw uploadsError;
+
+    // Format response for Unity
+    const result = uploads.map(u => ({
+      test_name: u.name,
+      model_url: u.model_url,
+      image_url: u.image_url
+    }));
+    res.json({ ok: true, items: result });
+  } catch (e) {
+    console.error('Unity history API error:', e);
+    res.status(500).json({ error: e.message || 'Failed to fetch history' });
+  }
+});
+
 app.use('/api', uploadsRouter);
 app.use('/api/auth', authRouter);
 

@@ -138,7 +138,9 @@
 
     <div class="card">
       <h2>Live Preview</h2>
-      <div id="viewer" class="viewer"></div>
+      <div id="viewer" class="viewer">
+        <div id="preview-loading" style="text-align:center;padding:40px;color:#8aa0b2;">Live preview loading...</div>
+      </div>
       <div class="small" style="color:#444;">Shows a placeholder 3D model during processing. Will switch to the generated GLB once ready.</div>
     </div>
   </div>
@@ -197,9 +199,15 @@ supabase.auth.onAuthStateChange((event, session) => {
   btnSignOut.style.display = loggedIn ? 'inline-block' : 'none';
 });
 
-initPreview('#viewer');
+// Show loading indicator until Three.js is ready
+window.addEventListener('DOMContentLoaded', () => {
+  const previewLoading = document.getElementById('preview-loading');
+  initPreview('#viewer');
+  if (previewLoading) setTimeout(() => previewLoading.remove(), 1200);
+});
 
 btnUpload.onclick = async () => {
+  const previewLoading = document.getElementById('preview-loading');
   const token = await getSessionToken();
   if (!token) {
     alert('Please sign in first.');
@@ -226,7 +234,15 @@ btnUpload.onclick = async () => {
     if (!resp.ok) throw new Error(data.error || 'Upload failed');
 
     statusEl.textContent = 'Done!';
-    await loadModelUrl(data.upload.model_url);
+    // Show loading indicator in preview
+    if (previewLoading) previewLoading.textContent = 'Loading generated model...';
+    try {
+      await loadModelUrl(data.upload.model_url);
+      if (previewLoading) previewLoading.remove();
+    } catch (e) {
+      if (previewLoading) previewLoading.textContent = 'Failed to load preview.';
+      statusEl.textContent += ' (Preview error)';
+    }
   } catch (e) {
     console.error(e);
     statusEl.textContent = 'Error: ' + e.message;

@@ -88,8 +88,20 @@ export const uploadHandler = async (req, res) => {
 
     return res.json({ ok: true, upload: data });
   } catch (e) {
-    console.error('Upload error', e);
-    return res.status(500).json({ error: e.message || 'Upload failed' });
+    // Robust error logging
+    console.error('Upload error:', {
+      message: e.message,
+      stack: e.stack,
+      name: e.name,
+      error: e,
+      reqBody: req.body,
+      reqFile: req.file,
+      userId: req.user?.id
+    });
+    // If error is not serializable, send a generic message
+    let errorMsg = 'Upload failed';
+    if (e && typeof e.message === 'string') errorMsg = e.message;
+    return res.status(500).json({ error: errorMsg });
   }
 };
 
