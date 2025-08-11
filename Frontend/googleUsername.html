@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Set Username</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background: linear-gradient(120deg, #6a11cb 0%, #2575fc 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal {
+      background: #fff;
+      padding: 2.5rem 2rem;
+      border-radius: 1.2rem;
+      box-shadow: 0 8px 32px rgba(44,62,80,0.18);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    h2 {
+      color: #2575fc;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+    }
+    input {
+      padding: 0.7rem 1rem;
+      border-radius: 0.6rem;
+      border: 1px solid #dbeafe;
+      font-size: 1rem;
+      background: #f6f8fa;
+      margin-bottom: 1rem;
+      width: 100%;
+    }
+    button {
+      background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+      color: #fff;
+      border: none;
+      border-radius: 0.6rem;
+      padding: 0.8rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+      transition: background 0.2s;
+      width: 100%;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #2575fc 0%, #6a11cb 100%);
+    }
+    #username-error {
+      color: #e74c3c;
+      min-height: 1.2em;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="modal" id="username-modal">
+    <h2>Choose a Username</h2>
+    <input id="username-input" type="text" placeholder="Unique username">
+    <div id="username-error"></div>
+  <button id="set-username-btn">Set Username</button>
+  </div>
+  <script type="module" src="js/googleUsername.js"></script>
+</body>
+</html>

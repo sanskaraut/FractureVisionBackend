@@ -1,4 +1,4 @@
-import { adminSupabase } from '../supabase.js';
+import supabase from '../supabase.js';
 
 export async function requireAuth(req, res, next) {
   try {
@@ -6,10 +6,10 @@ export async function requireAuth(req, res, next) {
     const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
     if (!token) return res.status(401).json({ error: 'Missing token' });
 
-    const { data, error } = await adminSupabase.auth.getUser(token);
+  const { data, error } = await supabase.auth.getUser(token);
     if (error || !data?.user) return res.status(401).json({ error: 'Invalid token' });
 
-    req.user = { id: data.user.id, email: data.user.email };
+  req.user = { id: data.user.id, email: data.user.email };
     next();
   } catch (e) {
     console.error('Auth error', e);

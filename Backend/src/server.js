@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import 'dotenv/config';
 
 import uploadsRouter from './routes/uploads.js';
+import authRouter from './routes/auth.js';
 import { ensureBucket } from './supabase.js'; // requires ensureBucket in supabase.js (as shared earlier)
 
 const __filename = fileURLToPath(import.meta.url);
@@ -55,6 +56,7 @@ app.get('/health', (_, res) => res.send('OK'));
 
 // ---------- API Routes ----------
 app.use('/api', uploadsRouter);
+app.use('/api/auth', authRouter);
 
 // ---------- Explicit HTML routes (multi-page frontend) ----------
 app.get('/', (req, res) => {

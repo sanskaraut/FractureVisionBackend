@@ -1,8 +1,8 @@
-import { adminSupabase } from '../supabase.js';
+import supabase from '../supabase.js';
 
 export async function generateAutoName(userId) {
   // Find existing names like "newXray%d" for this user
-  const { data, error } = await adminSupabase
+  const { data, error } = await supabase
     .from('uploads')
     .select('name')
     .eq('user_id', userId)

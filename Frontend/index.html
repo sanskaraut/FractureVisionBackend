@@ -4,11 +4,116 @@
   <meta charset="utf-8" />
   <title>Med3D – Upload</title>
   <link rel="stylesheet" href="./styles.css">
+  <style>
+    body {
+      background: linear-gradient(120deg, #6a11cb 0%, #2575fc 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 16px rgba(44,62,80,0.10);
+      padding: 1.2rem 2rem;
+      margin-bottom: 2rem;
+    }
+    .nav strong {
+      font-size: 1.5rem;
+      color: #2575fc;
+    }
+    .btn {
+      background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+      color: #fff;
+      border: none;
+      border-radius: 0.6rem;
+      padding: 0.7rem 1.3rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: 0.7rem;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+      transition: background 0.2s;
+    }
+    .btn.secondary {
+      background: #e3e8f7;
+      color: #2575fc;
+      border: 1px solid #dbeafe;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 1.2rem;
+      box-shadow: 0 8px 32px rgba(44,62,80,0.13);
+      padding: 2.2rem 2rem;
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    h2 {
+      color: #2575fc;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+    }
+    .label {
+      font-size: 1rem;
+      color: #444;
+      margin-bottom: 0.2rem;
+      font-weight: 500;
+    }
+    .input, .file {
+      padding: 0.7rem 1rem;
+      border-radius: 0.6rem;
+      border: 1px solid #dbeafe;
+      font-size: 1rem;
+      background: #f6f8fa;
+      margin-bottom: 0.7rem;
+      transition: border 0.2s;
+    }
+    .input:focus, .file:focus {
+      border: 1.5px solid #2575fc;
+      outline: none;
+    }
+    #status {
+      color: #2575fc;
+      font-size: 1rem;
+      margin-left: 1rem;
+    }
+    .viewer {
+      background: #f6f8fa;
+      border-radius: 0.8rem;
+      min-height: 220px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+    }
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .card {
+        margin-bottom: 2rem;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
+<div class="container" id="main-content" style="display:none;">
   <div class="nav">
-    <div><strong>Med3D</strong></div>
+  <div><strong>Med3D</strong> <span id="navbar-username" style="font-size:1rem;color:#444;margin-left:1.2rem;"></span></div>
     <div class="row">
       <a href="./history.html" class="btn secondary">History</a>
       <button id="btnSignIn" class="btn">Sign in with Google</button>
@@ -25,7 +130,7 @@
       <label class="label" style="margin-top:10px;">Image (.jpg/.png)</label>
       <input id="fileInput" class="file" type="file" accept="image/png,image/jpeg" />
 
-      <div class="row" style="margin-top:12px;">
+      <div class="row" style="margin-top:12px; align-items:center;">
         <button id="btnUpload" class="btn">Upload & Generate</button>
         <div id="status" class="small"></div>
       </div>
@@ -34,7 +139,7 @@
     <div class="card">
       <h2>Live Preview</h2>
       <div id="viewer" class="viewer"></div>
-      <div class="small">Shows a placeholder 3D model during processing. Will switch to the generated GLB once ready.</div>
+      <div class="small" style="color:#444;">Shows a placeholder 3D model during processing. Will switch to the generated GLB once ready.</div>
     </div>
   </div>
 </div>
@@ -51,6 +156,38 @@ const fileInput = document.getElementById('fileInput');
 const nameInput = document.getElementById('nameInput');
 const statusEl = document.getElementById('status');
 
+// Check authentication and username before showing main content
+supabase.auth.getUser().then(async ({ data: { user } }) => {
+  if (!user) {
+    window.location.href = 'login.html';
+    return;
+  }
+  // Check if username exists in users table
+  const resp = await fetch('/api/auth/google/callback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: user.email, supabase_id: user.id })
+  });
+  const data = await resp.json();
+  if (data.needUsername) {
+    window.location.href = 'googleUsername.html';
+    return;
+  }
+  // Fetch username from users table
+  let username = '';
+  try {
+    const userResp = await fetch('/api/auth/google/callback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: user.email, supabase_id: user.id })
+    });
+    const userData = await userResp.json();
+    if (userData && userData.username) username = userData.username;
+  } catch {}
+  document.getElementById('navbar-username').textContent = username ? `@${username}` : '';
+  document.getElementById('main-content').style.display = '';
+});
+
 btnSignIn.onclick = () => signInWithGoogle();
 btnSignOut.onclick = () => signOut();
 
@@ -60,7 +197,7 @@ supabase.auth.onAuthStateChange((event, session) => {
   btnSignOut.style.display = loggedIn ? 'inline-block' : 'none';
 });
 
-initPreview('#viewer'); // load placeholder Model1.glb from backend public URL? We’ll use share link soon.
+initPreview('#viewer');
 
 btnUpload.onclick = async () => {
   const token = await getSessionToken();
@@ -89,7 +226,6 @@ btnUpload.onclick = async () => {
     if (!resp.ok) throw new Error(data.error || 'Upload failed');
 
     statusEl.textContent = 'Done!';
-    // Switch viewer to returned model
     await loadModelUrl(data.upload.model_url);
   } catch (e) {
     console.error(e);
