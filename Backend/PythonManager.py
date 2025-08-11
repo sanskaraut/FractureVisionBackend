@@ -215,39 +215,58 @@
     #     main()
 
 #!/usr/bin/env python3
+#!/usr/bin/env python3
 import argparse
 import json
 import os
 import sys
 import shutil
+from typing import Optional, Tuple
 
-def load_and_resize_image(image_path: str, scale_percent: int = 50):
+# Path to fallback GLB inside your project (Backend/assets/Model1.glb)
+FALLBACK_GLB_PATH = os.path.join(
+    os.path.dirname(__file__),  # Backend/
+    "assets",
+    "Model1.glb"
+)
+
+def load_and_resize_image(image_path: str, scale_percent: int = 50) -> Optional[Tuple[int, int]]:
+    """Load and (optionally) resize image; returns (width, height) or None if OpenCV unavailable."""
     try:
         import cv2  # type: ignore
     except Exception as e:
         print(f"[WARN] OpenCV not available, skipping resize. ({e})", file=sys.stderr)
         return None
+
     img = cv2.imread(image_path)
     if img is None:
         raise FileNotFoundError(f"Image not found or unreadable: {image_path}")
+
     width = max(1, int(img.shape[1] * scale_percent / 100))
     height = max(1, int(img.shape[0] * scale_percent / 100))
     _ = cv2.resize(img, (width, height))
     return (width, height)
 
+
 def try_copy_glb_as_is(src_glb: str, dst_glb: str) -> bool:
+    """Binary-copy an existing .glb without modification."""
     try:
         if not os.path.exists(src_glb):
             return False
         if not src_glb.lower().endswith('.glb'):
             return False
-        shutil.copyfile(src_glb, dst_glb)  # raw, unchanged
+        shutil.copyfile(src_glb, dst_glb)
         return True
     except Exception as e:
         print(f"[WARN] Raw GLB copy failed: {e}", file=sys.stderr)
         return False
 
-def preprocess_mesh_or_fallback(model_path: str | None):
+
+def preprocess_mesh_or_fallback(model_path: Optional[str]):
+    """
+    Try to load a non-GLB mesh via Open3D, else create a primitive box.
+    Returns (mesh, note) or (None, note) if Open3D not available.
+    """
     try:
         import open3d as o3d  # type: ignore
         import numpy as np    # type: ignore
@@ -274,7 +293,6 @@ def preprocess_mesh_or_fallback(model_path: str | None):
         except Exception as e:
             return None, f"Failed to create primitive: {e}"
 
-    # Minimal processing (no normalize/rotate to keep closer to original)
     try:
         if hasattr(mesh, "compute_vertex_normals"):
             mesh.compute_vertex_normals()
@@ -283,11 +301,14 @@ def preprocess_mesh_or_fallback(model_path: str | None):
 
     return mesh, note.strip()
 
+
 def mesh_stats(mesh):
+    """Return simple stats dict from an Open3D mesh (best-effort)."""
     try:
         import numpy as np  # type: ignore
     except Exception:
         return {}
+
     stats = {}
     try:
         if hasattr(mesh, "vertices"):
@@ -305,7 +326,9 @@ def mesh_stats(mesh):
         stats["warn"] = f"Failed computing stats: {e}"
     return stats
 
-def write_glb_from_mesh(mesh, out_glb_path):
+
+def write_glb_from_mesh(mesh, out_glb_path: str) -> bool:
+    """Write GLB via Open3D; return True on success."""
     try:
         import open3d as o3d  # type: ignore
     except Exception as e:
@@ -320,6 +343,7 @@ def write_glb_from_mesh(mesh, out_glb_path):
         print(f"[WARN] Failed writing GLB: {e}", file=sys.stderr)
         return False
 
+
 def main():
     parser = argparse.ArgumentParser(description="PythonManager: image->3D pipeline entrypoint")
     parser.add_argument("--input", required=True, help="Path to input image (jpg/png)")
@@ -330,41 +354,64 @@ def main():
     parser.add_argument("--headless", action="store_true", help="Do not open any windows")
     args = parser.parse_args()
 
+    # Validate input image
     if not os.path.exists(args.input):
         print(f"[ERROR] Input image not found: {args.input}", file=sys.stderr)
         sys.exit(2)
 
+    # Ensure output dirs exist
     os.makedirs(os.path.dirname(os.path.abspath(args.out_glb)), exist_ok=True)
     os.makedirs(os.path.dirname(os.path.abspath(args.out_json)), exist_ok=True)
 
+    # (Optional) image resize metadata
     resized_dims = None
     try:
         resized_dims = load_and_resize_image(args.input, args.scale)
     except FileNotFoundError as e:
-        print(f"[ERROR] {e}", file=sys.stderr); sys.exit(2)
+        print(f"[ERROR] {e}", file=sys.stderr)
+        sys.exit(2)
     except Exception as e:
         print(f"[WARN] Skipping image resize: {e}", file=sys.stderr)
 
-    # 1) If --model is a .glb, copy it AS-IS to out_glb and skip Open3D entirely.
+    # ---- Decide what GLB to produce/upload (ORDER MATTERS) ----
     wrote_glb = False
     prep_note = ""
+
+    # 1) If a .glb is provided via --model, copy it AS-IS
     if args.model and args.model.lower().endswith('.glb'):
         wrote_glb = try_copy_glb_as_is(args.model, args.out_glb)
         prep_note = "Raw GLB copied as-is." if wrote_glb else "Raw GLB copy failed."
 
-    # 2) Otherwise, try to create a GLB from mesh (minimal processing)
+    # 2) If not provided (or copy failed), prefer the big fallback Model1.glb
+    if not wrote_glb and os.path.exists(FALLBACK_GLB_PATH):
+        try:
+            shutil.copyfile(FALLBACK_GLB_PATH, args.out_glb)
+            wrote_glb = True
+            prep_note += " | Used fallback Model1.glb"
+        except Exception as e:
+            print(f"[WARN] Fallback copy failed: {e}", file=sys.stderr)
+
+    # 3) Only if neither worked, try a tiny procedural mesh (last resort)
     mesh = None
     if not wrote_glb:
         mesh, prep_note2 = preprocess_mesh_or_fallback(args.model)
-        prep_note = (prep_note + " " + prep_note2).strip()
+        prep_note = (prep_note + " " + (prep_note2 or "")).strip()
         if mesh is not None:
             wrote_glb = write_glb_from_mesh(mesh, args.out_glb)
 
-    # 3) JSON metadata (always)
+    # (Debug) Log final size to confirm which file was produced
+    if wrote_glb and os.path.exists(args.out_glb):
+        try:
+            size_mb = os.path.getsize(args.out_glb) / (1024 * 1024)
+            print(f"[INFO] Final GLB size: {size_mb:.2f} MB")
+        except Exception:
+            pass
+
+    # ---- JSON metadata (always) ----
     meta = {
         "status": "ok",
         "notes": "Pipeline placeholder. Replace with ML output.",
-        "preprocess_note": prep_note,
+        "preprocess_note": prep_note.strip(),
         "input_image_basename": os.path.basename(args.input),
         "resized_dims": {"width": resized_dims[0], "height": resized_dims[1]} if resized_dims else None,
         "measures": {}
@@ -381,9 +428,11 @@ def main():
     if wrote_glb:
         print(f"[INFO] GLB ready at: {args.out_glb}")
     else:
-        print("[INFO] GLB not produced; backend will fallback to placeholder Model1.glb.")
+        print("[ERROR] No GLB could be produced, and no fallback found.")
 
+    # Always exit 0 so Node backend proceeds (it handles errors/fallbacks too)
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()
