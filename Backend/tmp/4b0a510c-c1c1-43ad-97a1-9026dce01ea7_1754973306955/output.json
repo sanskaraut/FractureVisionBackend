@@ -1,0 +1,8 @@
+{
+  "status": "ok",
+  "notes": "Pipeline placeholder. Replace with ML output.",
+  "preprocess_note": "| Used fallback Model1.glb",
+  "input_image_basename": "156e887ec6be69e5f752313bc93bab02",
+  "resized_dims": null,
+  "measures": {}
+}
