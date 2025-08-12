@@ -1,256 +1,378 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Med3D – Upload</title>
-  <link rel="stylesheet" href="./styles.css">
-  <style>
-    body {
-      background: linear-gradient(120deg, #6a11cb 0%, #2575fc 100%);
-      min-height: 100vh;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 1100px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
-    .nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #fff;
-      border-radius: 1rem;
-      box-shadow: 0 4px 16px rgba(44,62,80,0.10);
-      padding: 1.2rem 2rem;
-      margin-bottom: 2rem;
-    }
-    .nav strong {
-      font-size: 1.5rem;
-      color: #2575fc;
-    }
-    .btn {
-      background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
-      color: #fff;
-      border: none;
-      border-radius: 0.6rem;
-      padding: 0.7rem 1.3rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-left: 0.7rem;
-      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-      transition: background 0.2s;
-    }
-    .btn.secondary {
-      background: #e3e8f7;
-      color: #2575fc;
-      border: 1px solid #dbeafe;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2.5rem;
-    }
-    .card {
-      background: #fff;
-      border-radius: 1.2rem;
-      box-shadow: 0 8px 32px rgba(44,62,80,0.13);
-      padding: 2.2rem 2rem;
-      min-height: 420px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    h2 {
-      color: #2575fc;
-      font-weight: 700;
-      margin-bottom: 1.2rem;
-    }
-    .label {
-      font-size: 1rem;
-      color: #444;
-      margin-bottom: 0.2rem;
-      font-weight: 500;
-    }
-    .input, .file {
-      padding: 0.7rem 1rem;
-      border-radius: 0.6rem;
-      border: 1px solid #dbeafe;
-      font-size: 1rem;
-      background: #f6f8fa;
-      margin-bottom: 0.7rem;
-      transition: border 0.2s;
-    }
-    .input:focus, .file:focus {
-      border: 1.5px solid #2575fc;
-      outline: none;
-    }
-    #status {
-      color: #2575fc;
-      font-size: 1rem;
-      margin-left: 1rem;
-    }
-    .viewer {
-      background: #f6f8fa;
-      border-radius: 0.8rem;
-      min-height: 220px;
-      margin-bottom: 1rem;
-      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-    }
-    @media (max-width: 900px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-      .card {
-        margin-bottom: 2rem;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fracture Vision | AI-Powered Medical Imaging</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{--primary-color:#0052FF;--primary-hover:#0045D1;--background-color:#FFFFFF;--surface-color:#F8F9FA;--text-color:#343a40;--heading-color:#121212;--border-color:#E9ECEF;--font-family:'Inter',sans-serif;--heading-font:'Poppins',sans-serif}*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:var(--font-family);background-color:var(--background-color);color:var(--text-color);line-height:1.7;font-size:18px}.container{max-width:1280px;margin:0 auto;padding:0 25px}.navbar{background:rgba(255,255,255,0.8);backdrop-filter:blur(12px);border-bottom:1px solid var(--border-color);padding:1.25rem 0;position:fixed;top:0;left:0;width:100%;z-index:1000}.navbar .container{display:flex;justify-content:space-between;align-items:center}.logo{font-family:var(--heading-font);font-size:1.75rem;font-weight:700;color:var(--heading-color);text-decoration:none;cursor:pointer}.navbar nav ul{list-style:none;display:flex;align-items:center;gap:40px}.navbar nav a{font-size:1.1rem;text-decoration:none;color:var(--text-color);font-weight:600;transition:color 0.3s ease;cursor:pointer}.navbar nav a:hover{color:var(--primary-color)}#profile-container{position:relative}.google-btn{display:inline-flex;align-items:center;gap:10px;padding:10px 20px;background-color:transparent;color:var(--heading-color);border:2px solid var(--border-color);border-radius:8px;font-weight:600;font-size:1rem;cursor:pointer;transition:all 0.3s ease}.google-btn:hover{border-color:var(--primary-color);color:var(--primary-color)}.google-btn img{width:20px;height:20px}.profile-icon{width:45px;height:45px;border-radius:50%;background:linear-gradient(135deg,var(--primary-color),#00A3FF);color:white;display:flex;justify-content:center;align-items:center;font-size:1.2rem;font-weight:600;cursor:pointer}.profile-dropdown{position:absolute;top:60px;right:0;background:var(--background-color);border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.1);border:1px solid var(--border-color);list-style:none;padding:10px 0;width:180px;z-index:1001;opacity:0;visibility:hidden;transform:translateY(-10px);transition:opacity 0.2s ease,transform 0.2s ease,visibility 0.2s}.profile-dropdown.show{opacity:1;visibility:visible;transform:translateY(0)}.profile-dropdown li a{display:block;padding:12px 20px;font-weight:600;font-size:1rem;color:var(--text-color);text-decoration:none}.profile-dropdown li a:hover{background-color:var(--surface-color)}.profile-dropdown .divider{height:1px;background-color:var(--border-color);margin:8px 0}.hero{position:relative;height:100vh;display:flex;justify-content:center;align-items:center;background-color:#F0F4FF;text-align:center;overflow:hidden}#hero-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;cursor:none}.hero-content{position:relative;z-index:2;padding:20px}.hero h1{font-family:var(--heading-font);font-size:5rem;font-weight:700;line-height:1.1;color:var(--heading-color);max-width:900px;margin:0 auto 30px auto}.hero .subtitle{font-size:1.5rem;max-width:750px;margin:0 auto 50px;color:var(--text-color);line-height:1.6}.btn-primary{background-color:var(--primary-color);color:white;padding:18px 40px;border-radius:10px;border:none;font-size:1.25rem;font-weight:600;cursor:pointer;transition:all 0.3s ease}.btn-primary:hover{background-color:var(--primary-hover);transform:translateY(-4px);box-shadow:0 10px 20px rgba(0,82,255,0.25)}main>section:not(.hero){padding:120px 0}
+        .section-title{font-family:var(--heading-font);text-align:center;font-size:3.5rem;margin-bottom:80px;font-weight:700;color:var(--heading-color)}#features{background-color:var(--surface-color)}.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px}
+        /* .feature-card{background:var(--background-color);border:1px solid var(--border-color);border-radius:12px;padding:40px;transition:all 0.3s ease}.feature-card:hover{transform:translateY(-10px);border-color:var(--primary-color);box-shadow:0 15px 30px rgba(0,0,0,0.07)}.feature-card .icon{font-size:3.5rem;margin-bottom:25px;color:var(--primary-color)}.feature-card h3{font-family:var(--heading-font);font-size:1.75rem;margin-bottom:15px;color:var(--heading-color)}.feature-card p{font-size:1.1rem;line-height:1.7}#how-it-works{background:var(--background-color)} */
+     .feature-card {
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 40px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--primary-color);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.feature-card .icon {
+    font-size: 3.5rem;
+    margin-bottom: 5px;
+    color: var(--primary-color);
+    transition: color 0.25s ease;
+}
+
+.feature-card:hover .icon {
+    color: #ff6f61; /* soft highlight color */
+}
+
+
+         .section-title {
+    font-family: var(--heading-font);
+    text-align: center;
+    font-size: 3.5rem;
+    margin-bottom: 80px;
+    font-weight: 700;
+    color: var(--heading-color);
+    transition: color 0.3s ease, transform 0.3s ease;
+    cursor: pointer; /* So it feels interactive */
+}
+
+.section-title:hover {
+    color: var(--primary-color); /* Change to your primary color */
+    transform: scale(1.05); /* Slight zoom */
+}
+       
+        .steps-container{display:flex;justify-content:space-around;align-items:flex-start;gap:40px;text-align:center}.step{max-width:320px}.step-number{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--primary-color),#00A3FF);color:white;font-size:2rem;font-family:var(--heading-font);font-weight:700;display:inline-flex;justify-content:center;align-items:center;margin-bottom:30px;box-shadow:0 5px 15px rgba(0,82,255,0.2)}.step h3{font-family:var(--heading-font);font-size:1.75rem;margin-bottom:15px}.step p{font-size:1.1rem;line-height:1.7}.step-arrow{font-size:4rem;color:var(--primary-color);margin-top:50px;opacity:0.5}#about-us{background-color:var(--surface-color)}
+        
+        /* THIS IS THE MODIFIED SECTION */
+        .team-grid{display:grid;grid-template-columns:repeat(5, 1fr);gap:30px;}
+        
+     .team-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, scale 0.3s ease;
+    
+    /* --- ADD THESE THREE LINES --- */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Modified hover effect to include scaling */
+.team-card:hover {
+    transform: translateY(-5px) scale(1.03); /* combined translate & scale for smoother animation */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+
+.team-card h4 {
+    font-family: var(--heading-font);
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+    color: var(--heading-color);
+}
+
+.team-card p {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+    </style>
 </head>
 <body>
-<div class="container" id="main-content" style="display:none;">
-  <div class="nav">
-  <div><strong>Med3D</strong> <span id="navbar-username" style="font-size:1rem;color:#444;margin-left:1.2rem;"></span></div>
-    <div class="row">
-      <a href="./history.html" class="btn secondary">History</a>
-      <button id="btnSignIn" class="btn">Sign in with Google</button>
-      <button id="btnSignOut" class="btn secondary" style="display:none;">Sign out</button>
+    <header class="navbar">
+        <div class="container">
+            <a href="#" id="logo-link" class="logo">Fracture Vision 🦴</a>
+            <nav>
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#about-us">About Us</a></li>
+                    <li id="auth-container">
+                        <a href="./login.html" class="google-btn">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google G Logo"> Sign in
+                        </a>
+                    </li>
+                    <li id="profile-container" style="display: none;">
+                        <div class="profile-icon">DU</div>
+                        <ul class="profile-dropdown">
+                            <li><a href="./history.html">History</a></li>
+                            <li class="divider"></li>
+                            <li><a href="#" id="logout-btn">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div id="main-content">
+        <main>
+            <section id="hero" class="hero">
+                <canvas id="hero-canvas"></canvas>
+                <div class="hero-content">
+                    <h1>Transforming Diagnostics with AI</h1>
+                    <p class="subtitle">From a single 2D X-ray to a fully interactive 3D anatomical model with an instant AI diagnostic report.</p>
+                    <div>
+                        <input type="file" id="xray-upload" accept="image/*" style="display: none;">
+                        <button id="upload-button" class="btn-primary">Upload X-Ray & Get Started</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="features" class="features-section">
+                <div class="container">
+                    <h2 class="section-title">Revolutionary Features</h2>
+                    <div class="features-grid">
+                        <div class="feature-card"><div class="icon">🤖</div><h3>AI 3D Conversion</h3><p>Our deep learning model intelligently reconstructs a high-fidelity 3D model from your 2D X-ray image.</p></div>
+                        <div class="feature-card"><div class="icon">🧠</div><h3>AI Diagnostic Report</h3><p>Get instant, detailed reports on anatomical structures and potential issues, powered by our advanced AI model.</p></div>
+                        <div class="feature-card"><div class="icon">🕶️</div><h3>Immersive VR Experience</h3><p>Step inside the model. Explore the anatomy in a fully immersive virtual environment using a VR headset.</p></div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="how-it-works" class="how-it-works-section">
+                <div class="container">
+                    <h2 class="section-title">Simple, Fast, and Insightful</h2>
+                    <div class="steps-container">
+                        <div class="step"><div class="step-number">1</div><h3>Upload Image</h3><p>Securely upload a 2D X-ray image through our encrypted, user-friendly interface.</p></div>
+                        <div class="step-arrow">→</div>
+                        <div class="step"><div class="step-number">2</div><h3>AI Processing</h3><p>Our model analyzes the image, generates the 3D model, and runs diagnostics in seconds.</p></div>
+                        <div class="step-arrow">→</div>
+                        <div class="step"><div class="step-number">3</div><h3>Visualize & Act</h3><p>Interact with the model, review the AI report, and export for VR or surgical planning.</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="about-us" class="about-us-section">
+                <div class="container">
+                    <h2 class="section-title">The Team</h2>
+                    <div class="team-grid">
+                        <div class="team-card"><h4>Rounak Sondawale</h4><p>Project Lead & AI Specialist</p></div>
+                        <div class="team-card"><h4>Nupoor Raut</h4><p>Backend & Supabase Dev</p></div>
+                        <div class="team-card"><h4>Tanvi <br> Girase</h4><p>Frontend & UI/UX<br>Design</p></div>
+                        <div class="team-card"><h4>Sanskar Raut</h4><p>3D & VR Integration</p></div>
+                        <div class="team-card"><h4>Yashraj Ranmode</h4><p>Research & Documentation</p></div>
+                    </div>
+                    <!-- <div class="hackathon-info"><p>Developed for the <span>Fracture Vision</span></p></div>
+                </div> -->
+            </section>
+        </main>
+        <!-- <footer class="footer">
+            <div class="container">
+                <p>&copy; 2025 Fracture Vision. A step towards a new era in medical diagnostics.</p>
+            </div>
+        </footer> -->
     </div>
-  </div>
 
-  <div class="grid cols-2">
-    <div class="card">
-      <h2>Upload Image → Generate 3D</h2>
-      <label class="label">Test Name (optional)</label>
-      <input id="nameInput" class="input" placeholder="e.g., Forearm XRay 01" />
-
-      <label class="label" style="margin-top:10px;">Image (.jpg/.png)</label>
-      <input id="fileInput" class="file" type="file" accept="image/png,image/jpeg" />
-
-      <div class="row" style="margin-top:12px; align-items:center;">
-        <button id="btnUpload" class="btn">Upload & Generate</button>
-        <div id="status" class="small"></div>
-      </div>
+    <div id="output-content" class="output-section" style="display: none;">
+        <div class="container">
+            <h1 class="section-title">Analysis Result</h1>
+            <div id="status">⏳ Fetching results... Please wait.</div>
+            <div class="output-grid" id="results-container" style="display: none;">
+                <div class="card"><div id="viewer"></div></div>
+                <div class="card report">
+                    <h2>AI Diagnostic Report</h2>
+                    <div id="report-content"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="card">
-      <h2>Live Preview</h2>
-      <div id="viewer" class="viewer">
-        <div id="preview-loading" style="text-align:center;padding:40px;color:#8aa0b2;">Live preview loading...</div>
-      </div>
-      <div class="small" style="color:#444;">Shows a placeholder 3D model during processing. Will switch to the generated GLB once ready.</div>
-    </div>
-  </div>
-</div>
+    <script type="module">
+        import * as THREE from 'https://esm.sh/three@0.160.0';
+        import { GLTFLoader } from 'https://esm.sh/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'https://esm.sh/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+        import { supabase } from './js/supabaseClient.js';
+        import { signOut, getSessionToken } from './js/auth.js';
 
-<script type="module">
-import { supabase } from './js/supabaseClient.js';
-import { signInWithGoogle, signOut, getSessionToken } from './js/auth.js';
-import { initPreview, loadModelUrl } from './js/upload.js';
+        const mainContent = document.getElementById('main-content');
+        const outputContent = document.getElementById('output-content');
+        const authContainer = document.getElementById('auth-container');
+        const profileContainer = document.getElementById('profile-container');
+        const profileIcon = profileContainer.querySelector('.profile-icon');
+        const profileDropdown = profileContainer.querySelector('.profile-dropdown');
+        const logoutBtn = document.getElementById('logout-btn');
+        const uploadButton = document.getElementById('upload-button');
+        const xrayUploadInput = document.getElementById('xray-upload');
+        const logoLink = document.getElementById('logo-link');
 
-const btnSignIn = document.getElementById('btnSignIn');
-const btnSignOut = document.getElementById('btnSignOut');
-const btnUpload = document.getElementById('btnUpload');
-const fileInput = document.getElementById('fileInput');
-const nameInput = document.getElementById('nameInput');
-const statusEl = document.getElementById('status');
+        function showMainPage() {
+            mainContent.style.display = 'block';
+            outputContent.style.display = 'none';
+            window.scrollTo(0, 0);
+        }
 
-// Check authentication and username before showing main content
-supabase.auth.getUser().then(async ({ data: { user } }) => {
-  if (!user) {
-    window.location.href = 'login.html';
-    return;
-  }
-  // Check if username exists in users table
-  const resp = await fetch('/api/auth/google/callback', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: user.email, supabase_id: user.id })
-  });
-  const data = await resp.json();
-  if (data.needUsername) {
-    window.location.href = 'googleUsername.html';
-    return;
-  }
-  // Fetch username from users table
-  let username = '';
-  try {
-    const userResp = await fetch('/api/auth/google/callback', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: user.email, supabase_id: user.id })
-    });
-    const userData = await userResp.json();
-    if (userData && userData.username) username = userData.username;
-  } catch {}
-  document.getElementById('navbar-username').textContent = username ? `@${username}` : '';
-  document.getElementById('main-content').style.display = '';
-});
+        function showOutputPage() {
+            mainContent.style.display = 'none';
+            outputContent.style.display = 'block';
+            window.scrollTo(0, 0);
+        }
 
-btnSignIn.onclick = () => signInWithGoogle();
-btnSignOut.onclick = () => signOut();
+        logoLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showMainPage();
+        });
 
-supabase.auth.onAuthStateChange((event, session) => {
-  const loggedIn = !!session?.user;
-  btnSignIn.style.display = loggedIn ? 'none' : 'inline-block';
-  btnSignOut.style.display = loggedIn ? 'inline-block' : 'none';
-});
+        supabase.auth.onAuthStateChange((_event, session) => {
+            const userIsLoggedIn = !!session?.user;
+            if (userIsLoggedIn) {
+                authContainer.style.display = 'none';
+                profileContainer.style.display = 'list-item';
+                profileIcon.textContent = session.user.email.charAt(0).toUpperCase();
+                profileIcon.title = session.user.email;
+            } else {
+                authContainer.style.display = 'list-item';
+                profileContainer.style.display = 'none';
+            }
+        });
 
-// Show loading indicator until Three.js is ready
-window.addEventListener('DOMContentLoaded', () => {
-  const previewLoading = document.getElementById('preview-loading');
-  initPreview('#viewer');
-  if (previewLoading) setTimeout(() => previewLoading.remove(), 1200);
-});
+        logoutBtn.addEventListener('click', (e) => { e.preventDefault(); signOut(); });
+        profileIcon.addEventListener('click', (e) => { e.stopPropagation(); profileDropdown.classList.toggle('show'); });
+        window.addEventListener('click', () => { if (profileDropdown.classList.contains('show')) profileDropdown.classList.remove('show'); });
 
-btnUpload.onclick = async () => {
-  const previewLoading = document.getElementById('preview-loading');
-  const token = await getSessionToken();
-  if (!token) {
-    alert('Please sign in first.');
-    return;
-  }
-  const file = fileInput.files?.[0];
-  if (!file) {
-    alert('Please choose an image');
-    return;
-  }
-  statusEl.textContent = 'Uploading & processing...';
+        uploadButton.addEventListener('click', () => xrayUploadInput.click());
+        xrayUploadInput.addEventListener('change', async (event) => {
+            const file = event.target.files?.[0];
+            if (!file) return;
 
-  const fd = new FormData();
-  fd.append('file', file);
-  if (nameInput.value.trim()) fd.append('name', nameInput.value.trim());
+            const token = await getSessionToken();
+            if (!token) {
+                alert("Please sign in to upload an X-ray.");
+                window.location.href = './login.html';
+                return;
+            }
+            
+            showOutputPage();
+            const statusEl = document.getElementById('status');
+            statusEl.style.display = 'block';
+            const resultsContainer = document.getElementById('results-container');
+            resultsContainer.style.display = 'none';
+            statusEl.textContent = 'Uploading and processing...';
 
-  try {
-    const resp = await fetch('http://localhost:5500/api/upload', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token },
-      body: fd
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || 'Upload failed');
+            const formData = new FormData();
+            formData.append('file', file);
 
-    statusEl.textContent = 'Done!';
-    // Show loading indicator in preview
-    if (previewLoading) previewLoading.textContent = 'Loading generated model...';
-    try {
-      await loadModelUrl(data.upload.model_url);
-      if (previewLoading) previewLoading.remove();
-    } catch (e) {
-      if (previewLoading) previewLoading.textContent = 'Failed to load preview.';
-      statusEl.textContent += ' (Preview error)';
-    }
-  } catch (e) {
-    console.error(e);
-    statusEl.textContent = 'Error: ' + e.message;
-  }
-};
-</script>
+            try {
+                const response = await fetch('http://localhost:5500/api/upload', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    body: formData,
+                });
 
-<!-- Three.js + GLTFLoader via ESM -->
-<script type="module" src="./js/upload.js"></script>
+                if (!response.ok) throw new Error((await response.json()).error || 'Upload failed.');
+                
+                const result = await response.json();
+                pollForResults(result.upload.id);
+
+            } catch (error) {
+                statusEl.textContent = `❌ Error: ${error.message}`;
+            }
+        });
+
+        async function pollForResults(uploadId) {
+            const statusEl = document.getElementById('status');
+            const resultsContainer = document.getElementById('results-container');
+            
+            try {
+                const response = await fetch(`http://localhost:5500/api/results/${uploadId}`);
+                const data = await response.json();
+
+                if (data.status === 'processing') {
+                    statusEl.textContent = `⚙️ Analysis is processing. Please wait...`;
+                    setTimeout(() => pollForResults(uploadId), 3000);
+                } else if (data.status === 'completed') {
+                    statusEl.style.display = 'none';
+                    resultsContainer.style.display = 'grid';
+                    document.getElementById('report-content').textContent = data.report_text;
+                    initializeAndLoadModel(data.model_url);
+                } else {
+                    throw new Error(data.message || 'Analysis failed.');
+                }
+            } catch (error) {
+                statusEl.textContent = `❌ Error fetching results: ${error.message}`;
+            }
+        }
+
+        function initializeAndLoadModel(modelUrl) {
+            const container = document.getElementById('viewer');
+            container.innerHTML = '';
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.01, 100);
+            camera.position.set(0, 1.5, 3);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.target.set(0, 1, 0);
+            scene.add(new THREE.HemisphereLight(0xffffff, 0x333333, 1.2));
+            scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+            const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.5);
+            dirLight1.position.set(3, 5, 2);
+            scene.add(dirLight1);
+            const loader = new GLTFLoader();
+            loader.load(modelUrl, (gltf) => {
+                const model = gltf.scene;
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                model.position.y -= center.y;
+                model.rotation.y = Math.PI;
+                scene.add(model);
+            });
+            const animate = () => {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            };
+            window.addEventListener('resize', () => {
+                const w = container.clientWidth, h = container.clientHeight;
+                renderer.setSize(w, h);
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+            });
+            animate();
+        }
+
+        const canvas = document.getElementById('hero-canvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            let particles = [];
+            const mouse = { x: null, y: null, radius: 150 };
+            window.addEventListener('mousemove', e => { mouse.x = e.x; mouse.y = e.y; });
+            window.addEventListener('mouseout', () => { mouse.x = null; mouse.y = null; });
+            window.addEventListener('resize', () => {
+                canvas.width = innerWidth;
+                canvas.height = innerHeight;
+                init();
+            });
+            class Particle {
+                constructor(x,y,dX,dY,s,c){this.x=x;this.y=y;this.directionX=dX;this.directionY=dY;this.size=s;this.color=c;this.baseSize=s;}
+                draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2,false);ctx.fillStyle=this.color;ctx.fill();}
+                update(){if(this.x>canvas.width||this.x<0)this.directionX=-this.directionX;if(this.y>canvas.height||this.y<0)this.directionY=-this.directionY;let dx=mouse.x-this.x;let dy=mouse.y-this.y;let d=Math.sqrt(dx*dx+dy*dy);if(d<mouse.radius){if(this.size<this.baseSize+3)this.size+=0.5;this.color='rgba(0,82,255,1)';}else if(this.size>this.baseSize){this.size-=0.1;this.color='rgba(0,82,255,0.5)';}if(this.size<this.baseSize)this.size=this.baseSize;this.x+=this.directionX;this.y+=this.directionY;this.draw();}
+            }
+            function init(){particles=[];let n=(canvas.height*canvas.width)/25000;for(let i=0;i<n;i++){let s=(Math.random()*1.5)+1;let x=(Math.random()*((innerWidth-s*2)-(s*2))+s*2);let y=(Math.random()*((innerHeight-s*2)-(s*2))+s*2);let dX=(Math.random()*0.4)-0.2;let dY=(Math.random()*0.4)-0.2;particles.push(new Particle(x,y,dX,dY,s,'rgba(0,82,255,0.5)'));}}
+            function animate(){requestAnimationFrame(animate);ctx.clearRect(0,0,innerWidth,innerHeight);for(let i=0;i<particles.length;i++)particles[i].update();}
+            init();
+            animate();
+        }
+    </script>
 </body>
 </html>

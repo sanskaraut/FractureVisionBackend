@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fracture Vision | AI-Powered Medical Imaging</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0052FF;
+            --primary-hover: #0045D1;
+            --background-color: #FFFFFF;
+            --surface-color: #F8F9FA;
+            --text-color: #343a40;
+            --heading-color: #121212;
+            --border-color: #E9ECEF;
+            --font-family: 'Inter', sans-serif;
+            --heading-font: 'Poppins', sans-serif;
+        }
+
+        /* --- General & Reset --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            font-size: 18px;
+        }
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 25px;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .logo {
+            font-family: var(--heading-font);
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--heading-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .navbar nav ul { list-style: none; display: flex; align-items: center; gap: 40px; }
+        .navbar nav a {
+            font-size: 1.1rem;
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 600;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+        .navbar nav a:hover { color: var(--primary-color); }
+
+        /* --- Auth & Profile Dropdown --- */
+        #profile-container { position: relative; }
+        .google-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background-color: transparent;
+            color: var(--heading-color);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .google-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
+        .google-btn img { width: 20px; height: 20px; }
+        .profile-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), #00A3FF);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .profile-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: var(--background-color);
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            list-style: none;
+            padding: 10px 0;
+            width: 180px;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+        }
+        .profile-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        .profile-dropdown li a { display: block; padding: 12px 20px; font-weight: 600; font-size: 1rem; color: var(--text-color); text-decoration: none;}
+        .profile-dropdown li a:hover { background-color: var(--surface-color); }
+        .profile-dropdown .divider { height: 1px; background-color: var(--border-color); margin: 8px 0; }
+
+        /* --- Hero Section --- */
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #F0F4FF;
+            text-align: center;
+            overflow: hidden;
+        }
+        #hero-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; cursor: none; }
+        .hero-content { position: relative; z-index: 2; padding: 20px; }
+        .hero h1 {
+            font-family: var(--heading-font);
+            font-size: 5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            color: var(--heading-color);
+            max-width: 900px;
+            margin: 0 auto 30px auto;
+        }
+        .hero .subtitle {
+            font-size: 1.5rem;
+            max-width: 750px;
+            margin: 0 auto 50px;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 18px 40px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 82, 255, 0.25);
+        }
+
+        /* --- Sections General Style --- */
+        main > section:not(.hero) {
+             padding: 120px 0;
+        }
+        .section-title {
+            font-family: var(--heading-font);
+            text-align: center;
+            font-size: 3.5rem;
+            margin-bottom: 80px;
+            font-weight: 700;
+            color: var(--heading-color);
+        }
+
+        /* --- Features Section --- */
+        #features { background-color: var(--surface-color); }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
+        .feature-card {
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-color);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.07);
+        }
+        .feature-card .icon { font-size: 3.5rem; margin-bottom: 25px; color: var(--primary-color); }
+        .feature-card h3 {
+            font-family: var(--heading-font);
+            font-size: 1.75rem;
+            margin-bottom: 15px;
+            color: var(--heading-color);
+        }
+        .feature-card p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        /* --- How It Works Section --- */
+        #how-it-works { background: var(--background-color); }
+        .steps-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            gap: 40px;
+            text-align: center;
+        }
+        .step { max-width: 320px; }
+        .step-number {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), #00A3FF);
+            color: white;
+            font-size: 2rem;
+            font-family: var(--heading-font);
+            font-weight: 700;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 82, 255, 0.2);
+        }
+        .step h3 {
+            font-family: var(--heading-font);
+            font-size: 1.75rem;
+            margin-bottom: 15px;
+        }
+        .step p { font-size: 1.1rem; line-height: 1.7; }
+        .step-arrow {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-top: 50px;
+            opacity: 0.5;
+        }
+
+        /* --- About Us Section --- */
+        #about-us {
+             background-color: var(--surface-color);
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        .team-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .team-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+        }
+        .team-card h4 {
+            font-family: var(--heading-font);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: var(--heading-color);
+        }
+        .team-card p {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        .hackathon-info {
+            text-align: center;
+            margin-top: 80px;
+            font-size: 1.2rem;
+            color: var(--text-color);
+        }
+        .hackathon-info span {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .footer { background-color: var(--heading-color); color: var(--background-color); text-align: center; padding: 40px 0;}
+        
+        /* --- Responsive --- */
+        @media (max-width: 992px) {
+            .hero h1 { font-size: 4rem; }
+            .hero .subtitle { font-size: 1.3rem; }
+            .section-title { font-size: 2.8rem; }
+            .steps-container { flex-direction: column; align-items: center; }
+            .step-arrow { transform: rotate(90deg); margin: 20px 0; }
+        }
+        @media (max-width: 768px) {
+            body { font-size: 16px; }
+            .navbar nav ul { display: none; }
+            .hero h1 { font-size: 3rem; }
+            .hero .subtitle { font-size: 1.1rem; }
+            .section-title { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="homepage" class="page active">
+        <header class="navbar">
+            <div class="container">
+                <a href="#hero" class="logo">Fracture Vision 🦴</a>
+                <nav>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#about-us">About Us</a></li>
+                        <li id="auth-container">
+                            <button class="google-btn">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google G Logo"> Sign in
+                            </button>
+                        </li>
+                        <li id="profile-container" style="display: none;">
+                            <div class="profile-icon" title="Demo User">DU</div>
+                            <ul class="profile-dropdown">
+                                <li><a href="#">History</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#" id="logout-btn">Logout</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <section id="hero" class="hero">
+                <canvas id="hero-canvas"></canvas>
+                <div class="hero-content">
+                    <h1>Transforming Diagnostics with AI</h1>
+                    <p class="subtitle">From a single 2D X-ray to a fully interactive 3D anatomical model with an instant AI diagnostic report.</p>
+                    <div>
+                        <input type="file" id="xray-upload" accept="image/*" style="display: none;">
+                        <button id="upload-button" class="btn-primary">Upload X-Ray & Get Started</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="features" class="features-section">
+                <div class="container">
+                    <h2 class="section-title">Revolutionary Features</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="icon">🤖</div>
+                            <h3>AI 3D Conversion</h3>
+                            <p>Our deep learning model intelligently reconstructs a high-fidelity 3D model from your 2D X-ray image.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="icon">🧠</div>
+                            <h3>AI Diagnostic Report</h3>
+                            <p>Get instant, detailed reports on anatomical structures and potential issues, powered by our advanced AI model.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="icon">🕶️</div>
+                            <h3>Immersive VR Experience</h3>
+                            <p>Step inside the model. Explore the anatomy in a fully immersive virtual environment using a VR headset.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="how-it-works" class="how-it-works-section">
+                 <div class="container">
+                    <h2 class="section-title">Simple, Fast, and Insightful</h2>
+                     <div class="steps-container">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <h3>Upload Image</h3>
+                            <p>Securely upload a 2D X-ray image through our encrypted, user-friendly interface.</p>
+                        </div>
+                        <div class="step-arrow">→</div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <h3>AI Processing</h3>
+                            <p>Our model analyzes the image, generates the 3D model, and runs diagnostics in seconds.</p>
+                        </div>
+                         <div class="step-arrow">→</div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <h3>Visualize & Act</h3>
+                            <p>Interact with the model, review the AI report, and export for VR or surgical planning.</p>
+                        </div>
+                     </div>
+                 </div>
+            </section>
+
+            <section id="about-us" class="about-us-section">
+                <div class="container">
+                    <h2 class="section-title">The Team</h2>
+                    <div class="team-grid">
+                        <div class="team-card"><h4>Priya Sharma</h4><p>Project Lead & AI Specialist</p></div>
+                        <div class="team-card"><h4>Rohan Verma</h4><p>Backend & Firebase Dev</p></div>
+                        <div class="team-card"><h4>Anjali Mehta</h4><p>Frontend & UI/UX Design</p></div>
+                        <div class="team-card"><h4>Vikram Singh</h4><p>3D & VR Integration</p></div>
+                        <div class="team-card"><h4>Sneha Gupta</h4><p>Research & Documentation</p></div>
+                    </div>
+                    <div class="hackathon-info">
+                        <p>Developed for the <span>[Your Hackathon Name Here]</span></p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2025 Fracture Vision. A step towards a new era in medical diagnostics.</p>
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        const authContainer = document.getElementById('auth-container');
+        const profileContainer = document.getElementById('profile-container');
+        const profileIcon = profileContainer.querySelector('.profile-icon');
+        const profileDropdown = profileContainer.querySelector('.profile-dropdown');
+        
+        let isSignedIn = false;
+
+        const updateAuthUI = () => {
+            authContainer.style.display = isSignedIn ? 'none' : 'list-item';
+            profileContainer.style.display = isSignedIn ? 'list-item' : 'none';
+        };
+
+        profileIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('show');
+        });
+
+        authContainer.querySelector('.google-btn').addEventListener('click', () => {
+            isSignedIn = true;
+            updateAuthUI();
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            isSignedIn = false;
+            profileDropdown.classList.remove('show');
+            updateAuthUI();
+        });
+
+        window.addEventListener('click', () => {
+            if (profileDropdown.classList.contains('show')) {
+                profileDropdown.classList.remove('show');
+            }
+        });
+
+        // --- CORRECTED FILE UPLOAD LOGIC ---
+        const uploadButton = document.getElementById('upload-button');
+        const xrayUploadInput = document.getElementById('xray-upload');
+
+        uploadButton.addEventListener('click', () => {
+            xrayUploadInput.click();
+        });
+
+        xrayUploadInput.addEventListener('change', (event) => {
+            if (event.target.files && event.target.files.length > 0) {
+                const fileName = event.target.files[0].name;
+                alert(`File selected: ${fileName}\nThis would now proceed to the analysis page.`);
+            }
+        });
+
+
+        // --- CORRECTED INTERACTIVE CANVAS ANIMATION ---
+        const canvas = document.getElementById('hero-canvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            
+            const mouse = {
+                x: null,
+                y: null,
+                radius: 150
+            };
+
+            window.addEventListener('mousemove', function(event){
+                mouse.x = event.x;
+                mouse.y = event.y;
+            });
+            window.addEventListener('mouseout', function(){
+                mouse.x = null;
+                mouse.y = null;
+            });
+
+            class Particle {
+                constructor(x, y, directionX, directionY, size, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.directionX = directionX;
+                    this.directionY = directionY;
+                    this.size = size;
+                    this.color = color;
+                    this.baseSize = size;
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                }
+                update() {
+                    if (this.x > canvas.width || this.x < 0) {
+                        this.directionX = -this.directionX;
+                    }
+                    if (this.y > canvas.height || this.y < 0) {
+                        this.directionY = -this.directionY;
+                    }
+
+                    // Mouse interaction
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx*dx + dy*dy);
+                    if (distance < mouse.radius) {
+                        if(this.size < this.baseSize + 3) {
+                            this.size += 0.5;
+                        }
+                        this.color = 'rgba(0, 82, 255, 1)'; // Highlight color
+                    } else if (this.size > this.baseSize) {
+                        this.size -= 0.5;
+                        this.color = 'rgba(0, 82, 255, 0.5)'; // Base color
+                    }
+                    if (this.size < this.baseSize) {
+                        this.size = this.baseSize;
+                    }
+
+                    this.x += this.directionX;
+                    this.y += this.directionY;
+                    this.draw();
+                }
+            }
+            
+            function init() {
+                particles = [];
+                let numberOfParticles = (canvas.height * canvas.width) / 25000;
+                for (let i = 0; i < numberOfParticles; i++) {
+                    let size = (Math.random() * 1.5) + 1;
+                    let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                    let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                    let directionX = (Math.random() * .4) - .2;
+                    let directionY = (Math.random() * .4) - .2;
+                    let color = 'rgba(0, 82, 255, 0.5)';
+                    particles.push(new Particle(x, y, directionX, directionY, size, color));
+                }
+            }
+
+            function connect() {
+                let opacityValue = 1;
+                for (let a = 0; a < particles.length; a++) {
+                    for (let b = a; b < particles.length; b++) {
+                        let distance = ((particles[a].x - particles[b].x) * (particles[a].x - particles[b].x))
+                                     + ((particles[a].y - particles[b].y) * (particles[a].y - particles[b].y));
+                        if (distance < (canvas.width/7) * (canvas.height/7)) {
+                            opacityValue = 1 - (distance/20000);
+                            
+                            let dx = mouse.x - particles[a].x;
+                            let dy = mouse.y - particles[a].y;
+                            let mouseDistance = Math.sqrt(dx*dx + dy*dy);
+                            if(mouseDistance < mouse.radius){
+                                ctx.strokeStyle = `rgba(0, 82, 255, ${opacityValue})`;
+                            } else {
+                                ctx.strokeStyle = `rgba(0, 82, 255, ${opacityValue / 2})`;
+                            }
+                            
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[a].x, particles[a].y);
+                            ctx.lineTo(particles[b].x, particles[b].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.clearRect(0,0,innerWidth, innerHeight);
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                }
+                connect();
+            }
+            
+            window.addEventListener('resize', function(){
+                canvas.width = innerWidth;
+                canvas.height = innerHeight;
+                init();
+            });
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init();
+            animate();
+        }
+        
+        updateAuthUI();
+    });
+    </script>
+</body>
+</html>

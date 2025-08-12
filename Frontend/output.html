@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fracture Vision | Analysis Result</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{--primary-color:#0052FF;--surface-color:#F8F9FA;--text-color:#343a40;--heading-color:#121212;--border-color:#E9ECEF;--font-family:'Inter',sans-serif;--heading-font:'Poppins',sans-serif}body{font-family:var(--font-family);background-color:var(--surface-color);color:var(--text-color);margin:0;padding:40px 20px}.container{max-width:1200px;margin:0 auto}h1{font-family:var(--heading-font);color:var(--heading-color);text-align:center;margin-bottom:40px}.output-grid{display:grid;grid-template-columns:2fr 1fr;gap:40px}.card{background:white;border-radius:12px;padding:30px;border:1px solid var(--border-color)}#viewer{min-height:600px;width:100%;border-radius:8px;overflow:hidden}.report h2{font-family:var(--heading-font);margin-top:0;margin-bottom:20px;color:var(--primary-color)}#status{text-align:center;font-size:1.2rem;font-weight:600;padding:50px}@media (max-width:992px){.output-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Analysis Result</h1>
+        <div id="status">⏳ Fetching results for your scan... Please wait.</div>
+        <div class="output-grid" id="results-container" style="display: none;">
+            <div class="card">
+                <div id="viewer"></div>
+            </div>
+            <div class="card report">
+                <h2>AI Diagnostic Report</h2>
+                <div id="report-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Using ES Modules for Three.js
+        import * as THREE from 'https://esm.sh/three@0.160.0';
+        import { GLTFLoader } from 'https://esm.sh/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'https://esm.sh/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+        // --- GLOBAL VARIABLES FOR 3D SCENE ---
+        let scene, renderer, camera, loader, controls;
+
+        // This function combines your initPreview and loadModelUrl logic
+        function initializeAndLoadModel(modelUrl) {
+            const container = document.getElementById('viewer');
+            container.innerHTML = ''; // Clear any previous content
+
+            // --- Scene, Camera, and Renderer setup from your 'initPreview' ---
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.01, 100);
+            camera.position.set(0, 1.5, 3);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            // --- Controls from your 'initPreview' ---
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.target.set(0, 1, 0);
+
+            // --- Lighting setup from your 'initPreview' ---
+            scene.add(new THREE.HemisphereLight(0xffffff, 0x333333, 1.2));
+            scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+            const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.5);
+            dirLight1.position.set(3, 5, 2);
+            scene.add(dirLight1);
+            const dirLight2 = new THREE.DirectionalLight(0xffffff, 1.2);
+            dirLight2.position.set(-3, 2, -4);
+            scene.add(dirLight2);
+
+            // --- Loading the model using logic from your 'loadModelUrl' ---
+            loader = new GLTFLoader();
+            loader.load(modelUrl, (gltf) => {
+                const model = gltf.scene;
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                model.position.y -= center.y; // Center the model
+                model.rotation.y = Math.PI; // Your specific rotation
+                scene.add(model);
+            }, undefined, (error) => {
+                console.error('Failed to load final model:', error);
+                container.innerHTML = '<div style="color:red;text-align:center;padding:40px;">Failed to load 3D model.</div>';
+            });
+
+            // --- Animation loop and resize handler ---
+            const animate = () => {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            };
+            const onResize = () => {
+                const w = container.clientWidth, h = container.clientHeight;
+                renderer.setSize(w, h);
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+            };
+            window.addEventListener('resize', onResize);
+            animate();
+        }
+
+        // --- DATA FETCHING LOGIC ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const uploadId = params.get('id');
+            const statusEl = document.getElementById('status');
+            const resultsContainer = document.getElementById('results-container');
+
+            if (!uploadId) {
+                statusEl.textContent = '❌ Error: No analysis ID found.';
+                return;
+            }
+
+            const pollForResults = async () => {
+                try {
+                    // TODO: Make sure this results endpoint is correct for your backend
+                    const response = await fetch(`http://localhost:5500/api/results/${uploadId}`);
+                    const data = await response.json();
+
+                    if (data.status === 'processing') {
+                        statusEl.textContent = `⚙️ Analysis is processing. Checking again...`;
+                        setTimeout(pollForResults, 3000); // Poll every 3 seconds
+                    } else if (data.status === 'completed') {
+                        statusEl.style.display = 'none';
+                        resultsContainer.style.display = 'grid';
+                        document.getElementById('report-content').textContent = data.report_text;
+                        initializeAndLoadModel(data.model_url);
+                    } else {
+                        throw new Error(data.message || 'Analysis failed');
+                    }
+                } catch (error) {
+                    statusEl.textContent = `❌ Error fetching results: ${error.message}`;
+                }
+            };
+            
+            pollForResults();
+        });
+    </script>
+</body>
+</html>
